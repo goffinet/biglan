@@ -4,7 +4,7 @@
   tasks:
     - name: Generate an OpenSSH keypair
       openssh_keypair:
-        path: /root/.ssh/id_ssh_rsa
+        path: /root/.ssh/id_rsa
 - name: make a system vulnerable
   hosts: pcs
   gather_facts: False
