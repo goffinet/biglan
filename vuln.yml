@@ -1,0 +1,36 @@
+- name: Generate an OpenSSH keypair
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - openssh_keypair:
+        path: /root/.ssh/id_ssh_rsa
+- name: make a system vulnerable
+  hosts: pcs
+  gather_facts: False
+  tasks:
+    - name: create a weak user
+      user:
+        name: "{{ weak_user | default('admin') }}"
+        password: "{{ weak_user_password | default('testtest') | password_hash('sha512', 65534 | random(seed=inventory_hostname) | string) }}"
+    - name: configure a weak password for root
+      user:
+        name: "root"
+        password: "{{ weak_root_password|default('12345')| password_hash('sha512', 65534 | random(seed=inventory_hostname) | string) }}"
+    - name: create a weak sudo user
+      copy:
+        dest: "/etc/sudoers.d/{{ weak_user | default('admin') }}"
+        content: "ansible  ALL=(ALL) NOPASSWD:ALL"
+    - name: get the path of a binary
+      command: "which {{ binary|default('ping') }}"
+      register: binary_path
+    - name: fix the suid on the binary
+      file:
+        path: "{{ binary_path.stdout }}"
+        mode: +s
+    - name: set ipv4 forwarding
+      sysctl:
+        name: net.ipv4.ip_forward
+        value: '1'
+        sysctl_set: yes
+        state: present
+        reload: yes
