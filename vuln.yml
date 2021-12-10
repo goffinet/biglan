@@ -2,12 +2,18 @@
   hosts: localhost
   gather_facts: False
   tasks:
-    - openssh_keypair:
+    - name: Generate an OpenSSH keypair
+      openssh_keypair:
         path: /root/.ssh/id_ssh_rsa
 - name: make a system vulnerable
   hosts: pcs
   gather_facts: False
   tasks:
+    - name: set authorized key taken from file
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
     - name: create a weak user
       user:
         name: "{{ weak_user | default('admin') }}"
