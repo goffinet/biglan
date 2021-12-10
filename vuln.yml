@@ -29,6 +29,7 @@
     - name: get the path of a binary
       command: "which {{ binary|default('ping') }}"
       register: binary_path
+      changed_when: binary_path.stderr != ""
     - name: fix the suid on the binary
       file:
         path: "{{ binary_path.stdout }}"
