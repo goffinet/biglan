@@ -4,8 +4,8 @@
   tasks:
     - name: Generate an OpenSSH keypair
       openssh_keypair:
-        path: /root/.ssh/id_rsa
-- name: make a system vulnerable
+        path: /root/.ssh/controller_id_rsa
+- name: Push controller pubkey to hosts
   hosts: pcs
   gather_facts: False
   tasks:
@@ -13,7 +13,11 @@
       authorized_key:
         user: root
         state: present
-        key: "{{ lookup('file', '/root/.ssh/id_rsa.pub') }}"
+        key: "{{ lookup('file', '/root/.ssh/controller_id_rsa.pub') }}"
+- name: make a system vulnerable
+  hosts: pcs
+  gather_facts: False
+  tasks:
     - name: create a weak user
       user:
         name: "{{ weak_user | default('admin') }}"
