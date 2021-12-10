@@ -1,0 +1,16 @@
+- name: Generate an OpenSSH keypair
+  hosts: localhost
+  gather_facts: False
+  tasks:
+    - name: Generate an OpenSSH keypair
+      openssh_keypair:
+        path: /root/.ssh/controller_id_rsa
+- name: Push controller pubkey to hosts
+  hosts: pcs
+  gather_facts: False
+  tasks:
+    - name: set authorized key taken from file
+      authorized_key:
+        user: root
+        state: present
+        key: "{{ lookup('file', '/root/.ssh/controller_id_rsa.pub') }}"
